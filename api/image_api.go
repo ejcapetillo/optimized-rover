@@ -1,7 +1,9 @@
 package api
 
+import "errors"
+
 type ImageAPI interface {
-	GetImages() error
+	GetImages(nasaUrl string) error
 }
 
 type imageAPI struct {
@@ -11,6 +13,9 @@ func NewImageAPI() ImageAPI {
 	return &imageAPI{}
 }
 
-func (api *imageAPI) GetImages() error {
+func (api *imageAPI) GetImages(nasaUrl string) error {
+	if nasaUrl == "" {
+		return errors.New("missing URL")
+	}
 	return nil
 }
