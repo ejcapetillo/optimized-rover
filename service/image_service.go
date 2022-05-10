@@ -34,7 +34,7 @@ func (service *imageService) GetImages() error {
 		params.Add("api_key", "DEMO_KEY")
 
 		nasaURL := fmt.Sprintf("%s/%s/photos?%s", nasaAPIRoot, rover, params.Encode())
-		err = service.imageAPI.GetImages(nasaURL)
+		_, err = service.imageAPI.GetImages(nasaURL)
 	}
 
 	return err

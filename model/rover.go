@@ -1,13 +1,19 @@
 package model
 
-type Rover string
+type RoverName string
 
 const (
-	Curiosity   Rover = "curiosity"
-	Opportunity Rover = "opportunity"
-	Spirit      Rover = "spirit"
+	Curiosity   RoverName = "curiosity"
+	Opportunity RoverName = "opportunity"
+	Spirit      RoverName = "spirit"
 )
 
-func GetRovers() []Rover {
-	return []Rover{Curiosity, Opportunity, Spirit}
+func GetRovers() []RoverName {
+	return []RoverName{Curiosity, Opportunity, Spirit}
+}
+
+type Rover struct {
+	Id     int64     `json:"id"`
+	Name   RoverName `json:"name"`
+	Status string    `json:"status"`
 }
