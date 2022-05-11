@@ -9,7 +9,7 @@ import (
 )
 
 type ImageService interface {
-	GetImages() error
+	GetImages() (map[string]int, error)
 }
 
 type imageService struct {
@@ -25,21 +25,29 @@ func NewImageService(imageAPI api.ImageAPI) ImageService {
 var numDaysToCompare = 7
 var nasaAPIRoot = "https://api.nasa.gov/mars-photos/api/v1/rovers"
 
-func (service *imageService) GetImages() error {
+func (service *imageService) GetImages() (map[string]int, error) {
 	var err error
 	rovers := model.GetRovers()
-	_ = initializeImageMap()
+	imageMap := initializeImageMap()
 
-	for _, rover := range rovers {
-		params := url.Values{}
-		params.Add("earth_date", time.Now().Format("2006-01-02"))
-		params.Add("api_key", "DEMO_KEY")
+	for dateStr := range imageMap {
+		dateTotal := 0
+		for _, rover := range rovers {
+			params := url.Values{}
+			params.Add("earth_date", dateStr)
+			params.Add("api_key", "DEMO_KEY")
 
-		nasaURL := fmt.Sprintf("%s/%s/photos?%s", nasaAPIRoot, rover, params.Encode())
-		_, err = service.imageAPI.GetImages(nasaURL)
+			nasaURL := fmt.Sprintf("%s/%s/photos?%s", nasaAPIRoot, rover, params.Encode())
+			images, err := service.imageAPI.GetImages(nasaURL)
+			if err != nil {
+				return imageMap, err
+			}
+			dateTotal += len(images.Photos)
+		}
+		imageMap[dateStr] = dateTotal
 	}
 
-	return err
+	return imageMap, err
 }
 
 func initializeImageMap() map[string]int {
