@@ -27,24 +27,19 @@ var numDaysToCompare = 7
 
 func (service *imageService) GetImages() (map[string]int, error) {
 	var err error
-	rovers := model.GetRovers()
 	imageMap := initializeImageMap()
 
 	for dateStr := range imageMap {
-		dateTotal := 0
-		for _, rover := range rovers {
-			params := url.Values{}
-			params.Add("earth_date", dateStr)
-			params.Add("api_key", model.NasaAPIKey)
+		params := url.Values{}
+		params.Add("earth_date", dateStr)
+		params.Add("api_key", model.NasaAPIKey)
 
-			nasaURL := fmt.Sprintf("%s/%s/photos?%s", nasaRoverAPIRoot, rover, params.Encode())
-			images, err := service.imageAPI.GetImages(nasaURL)
-			if err != nil {
-				return imageMap, err
-			}
-			dateTotal += len(images.Photos)
+		nasaURL := fmt.Sprintf("%s/%s/photos?%s", nasaRoverAPIRoot, model.Curiosity, params.Encode())
+		images, err := service.imageAPI.GetImages(nasaURL)
+		if err != nil {
+			return imageMap, err
 		}
-		imageMap[dateStr] = dateTotal
+		imageMap[dateStr] = len(images.Photos)
 	}
 
 	return imageMap, err
