@@ -7,6 +7,9 @@ import (
 )
 
 func main() {
+	weatherService := service.NewWeatherService(api.NewWeatherAPI())
+	_ = weatherService.GetMarsWeather()
+
 	imageService := service.NewImageService(api.NewImageAPI())
 	imageMap, err := imageService.GetImages()
 	if err != nil {
