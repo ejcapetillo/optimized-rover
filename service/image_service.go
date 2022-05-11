@@ -22,8 +22,10 @@ func NewImageService(imageAPI api.ImageAPI) ImageService {
 	}
 }
 
-var numDaysToCompare = 7
+// TODO Split into separate config or secret
+var nasaAPIKey = "IWo1dIukz6jnuWiEWbl86cFnxjyOmallYO2raOnB"
 var nasaAPIRoot = "https://api.nasa.gov/mars-photos/api/v1/rovers"
+var numDaysToCompare = 7
 
 func (service *imageService) GetImages() (map[string]int, error) {
 	var err error
@@ -35,7 +37,7 @@ func (service *imageService) GetImages() (map[string]int, error) {
 		for _, rover := range rovers {
 			params := url.Values{}
 			params.Add("earth_date", dateStr)
-			params.Add("api_key", "DEMO_KEY")
+			params.Add("api_key", nasaAPIKey)
 
 			nasaURL := fmt.Sprintf("%s/%s/photos?%s", nasaAPIRoot, rover, params.Encode())
 			images, err := service.imageAPI.GetImages(nasaURL)
