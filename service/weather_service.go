@@ -8,7 +8,7 @@ import (
 )
 
 type WeatherService interface {
-	GetMarsWeather() (model.WeatherWrapper, error)
+	GetMarsWeather() error
 }
 
 type weatherService struct {
@@ -23,7 +23,7 @@ func NewWeatherService(weatherAPI api.WeatherAPI) WeatherService {
 
 var nasaWeatherAPIRoot = "https://api.nasa.gov/insight_weather/?"
 
-func (service *weatherService) GetMarsWeather() (model.WeatherWrapper, error) {
+func (service *weatherService) GetMarsWeather() error {
 	params := url.Values{}
 	params.Add("api_key", model.NasaAPIKey)
 	params.Add("feedtype", "json")
