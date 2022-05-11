@@ -22,11 +22,13 @@ func NewImageService(imageAPI api.ImageAPI) ImageService {
 	}
 }
 
+var numDaysToCompare = 7
 var nasaAPIRoot = "https://api.nasa.gov/mars-photos/api/v1/rovers"
 
 func (service *imageService) GetImages() error {
 	var err error
 	rovers := model.GetRovers()
+	_ = initializeImageMap()
 
 	for _, rover := range rovers {
 		params := url.Values{}
@@ -38,4 +40,17 @@ func (service *imageService) GetImages() error {
 	}
 
 	return err
+}
+
+func initializeImageMap() map[string]int {
+	imageMap := make(map[string]int)
+	now := time.Now()
+	day := time.Now().AddDate(0, 0, -1*numDaysToCompare)
+
+	for day.Before(now) {
+		imageMap[day.Format("2006-01-02")] = 0
+		day = day.AddDate(0, 0, 1)
+	}
+
+	return imageMap
 }
