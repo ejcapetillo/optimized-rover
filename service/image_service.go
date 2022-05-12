@@ -27,20 +27,20 @@ var nasaRoverAPIRoot = "https://api.nasa.gov/mars-photos/api/v1/rovers"
 var numDaysToCompare = 7
 
 func (service *imageService) GetImages() ([]model.DailyPhoto, error) {
-	imageMap := initializeImageMap()
+	dateList := initializeDateList()
 	var dayList []model.DailyPhoto
 
 	var wg sync.WaitGroup
 	dayChan := make(chan model.DailyPhoto)
 
-	for key := range imageMap {
-		link := getNasaUrl(key)
+	for _, date := range dateList {
+		link := getNasaUrl(date)
 		wg.Add(1)
-		go func(link string, key string) {
+		go func(link string, date string) {
 			defer wg.Done()
 			images, _ := service.imageAPI.GetImages(link)
-			dayChan <- model.DailyPhoto{EarthDate: key, Count: len(images.Photos)}
-		}(link, key)
+			dayChan <- model.DailyPhoto{EarthDate: date, Count: len(images.Photos)}
+		}(link, date)
 	}
 
 	go func() {
@@ -65,15 +65,15 @@ func getNasaUrl(dateStr string) string {
 	return nasaURL
 }
 
-func initializeImageMap() map[string]int {
-	imageMap := make(map[string]int)
+func initializeDateList() []string {
+	dateList := make([]string, 0, numDaysToCompare)
 	now := time.Now()
 	day := time.Now().AddDate(0, 0, -1*numDaysToCompare)
 
 	for day.Before(now) {
-		imageMap[day.Format("2006-01-02")] = 0
+		dateList = append(dateList, day.Format("2006-01-02"))
 		day = day.AddDate(0, 0, 1)
 	}
 
-	return imageMap
+	return dateList
 }
