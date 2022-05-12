@@ -5,11 +5,12 @@ import (
 	"github.com/ejcapetillo/optimized-rover/api"
 	"github.com/ejcapetillo/optimized-rover/model"
 	"net/url"
+	"sync"
 	"time"
 )
 
 type ImageService interface {
-	GetImages() (map[string]int, error)
+	GetImages() ([]model.DailyPhoto, error)
 }
 
 type imageService struct {
@@ -25,24 +26,43 @@ func NewImageService(imageAPI api.ImageAPI) ImageService {
 var nasaRoverAPIRoot = "https://api.nasa.gov/mars-photos/api/v1/rovers"
 var numDaysToCompare = 7
 
-func (service *imageService) GetImages() (map[string]int, error) {
-	var err error
+func (service *imageService) GetImages() ([]model.DailyPhoto, error) {
 	imageMap := initializeImageMap()
+	var dayList []model.DailyPhoto
 
-	for dateStr := range imageMap {
-		params := url.Values{}
-		params.Add("earth_date", dateStr)
-		params.Add("api_key", model.NasaAPIKey)
+	var wg sync.WaitGroup
+	dayChan := make(chan model.DailyPhoto)
 
-		nasaURL := fmt.Sprintf("%s/%s/photos?%s", nasaRoverAPIRoot, model.Curiosity, params.Encode())
-		images, err := service.imageAPI.GetImages(nasaURL)
-		if err != nil {
-			return imageMap, err
-		}
-		imageMap[dateStr] = len(images.Photos)
+	for key := range imageMap {
+		link := getNasaUrl(key)
+		wg.Add(1)
+		go func(link string, key string) {
+			defer wg.Done()
+			images, _ := service.imageAPI.GetImages(link)
+			dayChan <- model.DailyPhoto{EarthDate: key, Count: len(images.Photos)}
+		}(link, key)
 	}
 
-	return imageMap, err
+	go func() {
+		wg.Wait()
+		close(dayChan)
+	}()
+
+	for day := range dayChan {
+		dayList = append(dayList, day)
+	}
+
+	return dayList, nil
+}
+
+func getNasaUrl(dateStr string) string {
+	params := url.Values{}
+	params.Add("earth_date", dateStr)
+	params.Add("api_key", model.NasaAPIKey)
+
+	nasaURL := fmt.Sprintf("%s/%s/photos?%s", nasaRoverAPIRoot, model.Curiosity, params.Encode())
+
+	return nasaURL
 }
 
 func initializeImageMap() map[string]int {

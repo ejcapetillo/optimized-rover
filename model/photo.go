@@ -11,3 +11,8 @@ type Photo struct {
 type PhotoWrapper struct {
 	Photos []*Photo `json:"photos"`
 }
+
+type DailyPhoto struct {
+	EarthDate string
+	Count     int
+}

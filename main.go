@@ -12,7 +12,7 @@ func main() {
 
 	imageStart := time.Now()
 	imageService := service.NewImageService(api.NewImageAPI())
-	imageMap, err := imageService.GetImages()
+	imageList, err := imageService.GetImages()
 	if err != nil {
 		fmt.Printf("error found: %s", err)
 		return
@@ -20,7 +20,7 @@ func main() {
 	imageElapsed := time.Since(imageStart)
 	fmt.Printf("Image retrieval took %s\n", imageElapsed)
 
-	for key, value := range imageMap {
-		fmt.Printf("%s had %d images taken by all rovers\n", key, value)
+	for _, day := range imageList {
+		fmt.Printf("%d images taken by Curiosity on %s\n", day.Count, day.EarthDate)
 	}
 }
