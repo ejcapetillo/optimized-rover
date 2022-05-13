@@ -15,14 +15,16 @@ type ImageAPI struct {
 }
 
 // GetImages provides a mock function with given fields: nasaUrl
-func (_m *ImageAPI) GetImages(nasaUrl string) (model.PhotoWrapper, error) {
+func (_m *ImageAPI) GetImages(nasaUrl string) (*model.PhotoWrapper, error) {
 	ret := _m.Called(nasaUrl)
 
-	var r0 model.PhotoWrapper
-	if rf, ok := ret.Get(0).(func(string) model.PhotoWrapper); ok {
+	var r0 *model.PhotoWrapper
+	if rf, ok := ret.Get(0).(func(string) *model.PhotoWrapper); ok {
 		r0 = rf(nasaUrl)
 	} else {
-		r0 = ret.Get(0).(model.PhotoWrapper)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.PhotoWrapper)
+		}
 	}
 
 	var r1 error

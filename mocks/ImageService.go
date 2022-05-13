@@ -37,6 +37,29 @@ func (_m *ImageService) GetImages() ([]model.DailyPhoto, error) {
 	return r0, r1
 }
 
+// GetImagesSingleThread provides a mock function with given fields:
+func (_m *ImageService) GetImagesSingleThread() ([]model.DailyPhoto, error) {
+	ret := _m.Called()
+
+	var r0 []model.DailyPhoto
+	if rf, ok := ret.Get(0).(func() []model.DailyPhoto); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]model.DailyPhoto)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewImageService creates a new instance of ImageService. It also registers the testing.TB interface on the mock and a cleanup function to assert the mocks expectations.
 func NewImageService(t testing.TB) *ImageService {
 	mock := &ImageService{}
