@@ -11,6 +11,7 @@ import (
 
 type ImageService interface {
 	GetImages() ([]model.DailyPhoto, error)
+	GetImagesSingleThread() ([]model.DailyPhoto, error)
 }
 
 type imageService struct {
@@ -24,7 +25,7 @@ func NewImageService(imageAPI api.ImageAPI) ImageService {
 }
 
 var nasaRoverAPIRoot = "https://api.nasa.gov/mars-photos/api/v1/rovers"
-var numDaysToCompare = 7
+var numDaysToCompare = 25
 
 func (service *imageService) GetImages() ([]model.DailyPhoto, error) {
 	dateList := initializeDateList()
@@ -50,6 +51,27 @@ func (service *imageService) GetImages() ([]model.DailyPhoto, error) {
 
 	for day := range dayChan {
 		dayList = append(dayList, day)
+	}
+
+	return dayList, nil
+}
+
+func (service *imageService) GetImagesSingleThread() ([]model.DailyPhoto, error) {
+	dateList := initializeDateList()
+	var dayList []model.DailyPhoto
+
+	for _, dateStr := range dateList {
+		params := url.Values{}
+		params.Add("earth_date", dateStr)
+		params.Add("api_key", model.NasaAPIKey)
+
+		nasaURL := fmt.Sprintf("%s/%s/photos?%s", nasaRoverAPIRoot, model.Curiosity, params.Encode())
+		images, err := service.imageAPI.GetImages(nasaURL)
+		if err != nil {
+			return nil, err
+		}
+		dayCount := model.DailyPhoto{EarthDate: dateStr, Count: len(images.Photos)}
+		dayList = append(dayList, dayCount)
 	}
 
 	return dayList, nil
